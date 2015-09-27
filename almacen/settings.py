@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import dj_database_url
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -117,11 +118,12 @@ DAB_FIELD_RENDERER = 'django_admin_bootstrapped.renderers.BootstrapFieldRenderer
 from django.contrib import messages
 
 MESSAGE_TAGS = {
-        messages.SUCCESS: 'alert-success success',
-        messages.WARNING: 'alert-warning warning',
-        messages.ERROR: 'alert-danger error'
-        }
+    messages.SUCCESS: 'alert-success success',
+    messages.WARNING: 'alert-warning warning',
+    messages.ERROR: 'alert-danger error'
+}
 
-#messages.success(request, "My success message")
-#messages.warning(request, "My warning message")
-#messages.error(request, "My error message")
+DATABASES['default'] = dj_database_url.config()
+DATABASES['default']['ENGINE'] = 'django_postgrespool'
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+ALLOWED_HOSTS = ['*']
