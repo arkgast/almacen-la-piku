@@ -2,16 +2,23 @@
 
 from django.contrib import admin
 
-from proveedor.models import Proveedor, PedidoProveedor, DetallePedidoProveedor, DevolucionPedidoProveedor
+from proveedor.models import (
+    Proveedor, PedidoProveedor, 
+    DetallePedidoProveedor, DevolucionPedidoProveedor,
+    DevolucionPedidoProveedor, DetalleDevolucionPedidoProveedor
+)
 
 
-class DetallePedidoProveedorInline(admin.StackedInline):
+class DetallePedidoProveedorInline(admin.TabularInline):
     model = DetallePedidoProveedor
+    fields = ['producto', 'cantidad_solicitada', 'cantidad_entregada']
+
     extra = 1
+    min_num = 1
 
 
 class PedidoProveedorAdmin(admin.ModelAdmin):
-    fields = ['fecha_pedido', 'estado']
+    fields = ['proveedor', 'fecha_pedido', 'estado']
 
     list_display = ('fecha_pedido', 'estado', )
     list_filter = ('fecha_pedido', )
@@ -33,6 +40,32 @@ class PedidoProveedorAdmin(admin.ModelAdmin):
     pedido_entregado.short_description = "Pedido Entregado"
 
 
+class DetalleDevolucionPedidoProveedorInline(admin.TabularInline):
+    model = DetalleDevolucionPedidoProveedor
+    extra = 1
+    min_num = 1
+    show_change_link = False
+
+
+class DevolucionPedidoProveedorAdmin(admin.ModelAdmin):
+    fields = ['proveedor', 'fecha_devolucion', 'detalle']
+    inlines = [DetalleDevolucionPedidoProveedorInline]
+
+    def save_formset(self, request, form, formset, change):
+        instances = formset.save(commit=False)
+        for obj in formset.deleted_objects:
+            producto = obj.producto
+            producto.stock -= obj.cantidad_devuelta
+            producto.save()
+            obj.delete()
+        for instance in instances:
+            producto = instance.producto
+            producto.stock -= instance.cantidad_devuelta
+            producto.save()
+            instance.save()
+        formset.save_m2m()
+
+
 admin.site.register(Proveedor)
 admin.site.register(PedidoProveedor, PedidoProveedorAdmin)
-admin.site.register(DevolucionPedidoProveedor)
+admin.site.register(DevolucionPedidoProveedor, DevolucionPedidoProveedorAdmin)

@@ -7,6 +7,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 
 from usuario.models import Usuario
+from general import app_messages
 
 
 class UserCreationForm(forms.ModelForm):
@@ -22,7 +23,7 @@ class UserCreationForm(forms.ModelForm):
         password2 = self.cleaned_data.get("password2")
 
         if password1 and password2 and password1 != password2:
-            raise ValueError("Las contraseñas deben ser iguales")
+            raise forms.ValidationError(app_messages.PASSWORD_MUST_MATCH)
 
         return password2
 
@@ -68,7 +69,7 @@ class UsuarioAdmin(UserAdmin):
     filter_horizontal = ()
 
 
-admin.site.register(Usuario, UsuarioAdmin)
-admin.site.unregister(Group)
+# admin.site.register(Usuario, UsuarioAdmin)
+# admin.site.unregister(Group)
 
 admin.site.site_header = "LA PIKU DELICATESSEN"

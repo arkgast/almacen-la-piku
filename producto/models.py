@@ -14,7 +14,7 @@ class Producto(models.Model):
     precio_compra = models.DecimalField(max_digits=6, decimal_places=2)
     precio_venta = models.DecimalField(max_digits=6, decimal_places=2)
     fecha_vencimiento = models.DateField(verbose_name="Fecha de vencimiento")
-    stock = models.PositiveSmallIntegerField()
+    stock = models.DecimalField(max_digits=6, decimal_places=2, verbose_name="Cantidad disponible")
     unidad_de_medida = models.CharField(max_length=2, choices=UNIDADES_DE_MEDIDA)
 
     def __str__(self):

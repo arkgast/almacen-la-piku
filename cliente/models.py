@@ -10,6 +10,10 @@ from general.models import (
 
 
 class Cliente(models.Model):
+    class Meta:
+        verbose_name = "Cliente"
+        verbose_name_plural = "Cliente"
+
     nit = models.CharField(max_length=10)
     nombre = models.CharField(max_length=120)
     telefono = models.PositiveIntegerField(verbose_name="Telefóno")
@@ -19,6 +23,10 @@ class Cliente(models.Model):
 
 
 class PedidoCliente(Pedido):
+    class Meta:
+        verbose_name = "Pedido"
+        verbose_name_plural = "Pedido"
+
     cliente = models.ForeignKey(Cliente)
 
     def __str__(self):
@@ -26,6 +34,10 @@ class PedidoCliente(Pedido):
 
 
 class DetallePedidoCliente(DetallePedido):
+    class Meta:
+        verbose_name = "Detalle pedido"
+        verbose_name_plural = "Detalle pedido"
+
     pedido = models.ForeignKey(PedidoCliente)
 
     def __str__(self):
@@ -34,7 +46,10 @@ class DetallePedidoCliente(DetallePedido):
 
 class DevolucionPedidoCliente(DevolucionPedido):
     cliente = models.ForeignKey(Cliente)
-    pedido = models.ForeignKey(PedidoCliente)
+
+    class Meta:
+        verbose_name = "Devolución pedido"
+        verbose_name_plural = "Devolución pedido"
 
     def __str__(self):
         return str(self.cliente)
@@ -42,6 +57,10 @@ class DevolucionPedidoCliente(DevolucionPedido):
 
 class DetalleDevolucionPedidoCliente(DetalleDevolucionPedido):
     devolucion_pedido = models.ForeignKey(DevolucionPedidoCliente)
+
+    class Meta:
+        verbose_name = "Detalle devolución pedido"
+        verbose_name_plural = "Detalle devolución pedido"
 
     def __str__(self):
         return "DDPC " + str(self.devolucion_pedido)

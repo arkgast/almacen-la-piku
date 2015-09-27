@@ -1,3 +1,5 @@
+# coding=utf-8
+
 from django.db import models
 
 from producto.models import Producto
@@ -26,12 +28,7 @@ class DetallePedido(models.Model):
 
 
 class DevolucionPedido(models.Model):
-    MOTIVOS = (
-        ('PM', 'Producto en mal estado'),
-        ('PV', 'Producto vencido')
-    )
-    fecha_devolucion = models.DateField()
-    motivo = models.CharField(max_length=2, choices=MOTIVOS)
+    fecha_devolucion = models.DateField(verbose_name="Fecha devolución")
     detalle = models.TextField()
 
     class Meta:
@@ -39,8 +36,13 @@ class DevolucionPedido(models.Model):
 
 
 class DetalleDevolucionPedido(models.Model):
+    MOTIVOS = (
+        ('PM', 'Producto en mal estado'),
+        ('PV', 'Producto vencido')
+    )
     producto = models.ForeignKey(Producto)
     cantidad_devuelta = models.DecimalField(max_digits=6, decimal_places=2)
+    motivo = models.CharField(max_length=2, choices=MOTIVOS)
 
     class Meta:
         abstract = True
