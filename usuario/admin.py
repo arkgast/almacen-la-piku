@@ -2,8 +2,7 @@
 
 from django import forms
 from django.contrib import admin
-from django.contrib.auth.models import Group
-from django.contrib.auth.admin import UserAdmin 
+from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 
 from usuario.models import Usuario
@@ -26,7 +25,6 @@ class UserCreationForm(forms.ModelForm):
             raise forms.ValidationError(app_messages.PASSWORD_MUST_MATCH)
 
         return password2
-
 
     def save(self, commit=True):
         user = super(UserCreationForm, self).save(commit=False)
@@ -60,10 +58,10 @@ class UsuarioAdmin(UserAdmin):
     )
     add_fieldsets = (
         (None, {
-            'classes': ('wide', ), 
+            'classes': ('wide', ),
             'fields': ('email', 'date_of_birth', 'password1', 'password2')}
-        ),
-    ) 
+         ),
+    )
     search_fields = ('email', )
     ordering = ('email', )
     filter_horizontal = ()
@@ -73,3 +71,4 @@ class UsuarioAdmin(UserAdmin):
 # admin.site.unregister(Group)
 
 admin.site.site_header = "LA PIKU DELICATESSEN"
+admin.site.disable_action('delete_selected')

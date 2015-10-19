@@ -7,4 +7,5 @@ SQLAlchemy==1.0.4
 django-admin-bootstrapped==2.5.4
 django-bootstrap3==6.2.2
 django-user-agents==0.3.0
+django-wkhtmltopdf==2.0.3
 whitenoise==1.0.6

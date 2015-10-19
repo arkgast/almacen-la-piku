@@ -1,0 +1,42 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" href="{% static "cliente/style.css" %}" type="text/css">
+	<title>Cliente - Factura</title>
+</head>
+<body>
+
+	<header>
+		<h1>Recibo</h1>
+		<p> <b>Cliente: </b> {{ pedido.cliente}} </p>
+		<p> <b>Total pagado: </b> {{ pedido.total_pagado }} Bs </p>
+		<p> <b>Precio total: </b> {{ pedido.precio_total }} Bs </p>
+		<p> <b>Saldo: </b> {{ pedido.saldo }}  Bs</p>
+		<p> <b>Fecha del pedido: </b> {{pedido.fecha_pedido }} </p>
+	</header>
+
+	<table border=1>
+		<tr>
+			<td>Producto</td>
+			<td>Cantidad Solicitada</td>
+			<td>Cantidad Entregada</td>
+			<td>Sub Total</td>
+		</tr>
+		{% for detalle in detalle_pedido %}
+		<tr>
+			<td>{{ detalle.producto }}</td>
+			<td>{{ detalle.cantidad_solicitada }}</td>
+			<td>{{ detalle.cantidad_entregada }}</td>
+			<td>{{ detalle.sub_total }}</td>
+		</tr>
+		{% endfor %}
+		<tr>
+			<td>Precio Total</td>
+			<td colspan=3>{{ pedido.precio_total }}</td>
+		</tr>
+	</table>
+
+</body>
+</html>

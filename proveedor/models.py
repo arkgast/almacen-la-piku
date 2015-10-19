@@ -2,7 +2,7 @@
 
 from django.db import models
 
-from producto.models import Producto
+# from producto.models import Producto
 from general.models import (
     Pedido, DetallePedido,
     DevolucionPedido, DetalleDevolucionPedido
@@ -41,6 +41,7 @@ class DetallePedidoProveedor(DetallePedido):
         verbose_name = "Detalle pedido"
         verbose_name_plural = "Detalle pedido"
 
+    precio_compra = models.DecimalField(max_digits=6, decimal_places=2)
     pedido = models.ForeignKey(PedidoProveedor)
 
     def __str__(self):

@@ -5,10 +5,11 @@ import datetime
 
 from django import forms
 from django.contrib import admin
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
 
 from cliente.models import (
-    Cliente, PedidoCliente, 
-    DetallePedidoCliente, DevolucionPedidoCliente,
+    Cliente, PedidoCliente, DetallePedidoCliente,
     DevolucionPedidoCliente, DetalleDevolucionPedidoCliente,
 )
 from general import app_messages
@@ -50,48 +51,52 @@ class ClienteAdmin(admin.ModelAdmin):
 
 class DetallePedidoClienteInline(admin.TabularInline):
     extra = 1
-    fields = ['producto', 'cantidad_solicitada', 'cantidad_entregada']
+    fields = ['producto', 'cantidad_solicitada', 'cantidad_entregada', 'precio_venta']
     min_num = 1
     model = DetallePedidoCliente
     show_change_link = False
 
 
 class PedidoClienteAdmin(admin.ModelAdmin):
-    fields = ['cliente', 'fecha_pedido', 'estado']
+    fields = ['cliente', 'total_pagado']
     inlines = [DetallePedidoClienteInline]
-    list_display = ('cliente', 'fecha_pedido', 'precioTotal', 'estado', )
-    list_filter = ('fecha_pedido', 'cliente__nombre')
+    list_display = ('cliente', 'fecha_pedido', 'precio_total', 'total_pagado', 'saldo', 'cancelado', )
+    list_filter = ('fecha_pedido', 'estado')
     search_fields = ['fecha_pedido', 'cliente__nombre']
+    actions = ['generar_pdf']
 
+    def generar_pdf(self, request, queryset):
+        id = queryset[0].id
+        pedido_id = PedidoCliente.encryptId(id)
+        url = reverse('cliente:factura_pdf', kwargs={'pedido_id': pedido_id})
+        return HttpResponseRedirect(url)
 
-    def precioTotal(self, obj):
-        dps = DetallePedidoCliente.objects.filter(pedido=obj)
-        total = 0
-        for dp in dps:
-            total += dp.producto.precio_venta * dp.cantidad_entregada
-        return "%.2f Bs" % total
-
-    precioTotal.short_description = "Precio Total"
+    generar_pdf.short_description = "Generar recibo"
 
     def save_formset(self, request, form, formset, change):
         instances = formset.save(commit=False)
+
         for obj in formset.deleted_objects:
+            if obj.cantidad_entregada is None:
+                obj.cantidad_entregada = 0
             producto = obj.producto
-            producto.stock -= obj.cantidad_entregada
+            producto.stock += obj.cantidad_entregada
             producto.save()
             obj.delete()
         for instance in instances:
+            if instance.cantidad_entregada is None:
+                instance.cantidad_entregada = 0
             producto = instance.producto
-            producto.stock += instance.cantidad_entregada
+            producto.stock -= instance.cantidad_entregada
             producto.save()
             instance.save()
         formset.save_m2m()
 
 
-# Detalle Pedido Cliente
+# Detalle Pedido Cliente - Is not in use
 class DetallePedidoClienteAdmin(admin.ModelAdmin):
     fields = ['producto', 'cantidad_solicitada', 'cantidad_entregada', 'pedido']
-    list_display = ['pedido', 'fechaPedido', 'producto', 'precioVenta', 'cantidad_solicitada', 'cantidad_entregada', 'subTotal']
+    list_display = ['pedido', 'fechaPedido', 'producto', 'precio_venta', 'cantidad_solicitada', 'cantidad_entregada', 'subTotal']
     list_display_links = None
     list_filter = ['pedido__cliente__nombre']
     search_fields = ['pedido__cliente__nombre', 'producto__nombre']
@@ -100,11 +105,6 @@ class DetallePedidoClienteAdmin(admin.ModelAdmin):
         return "%.2f Bs" % (obj.producto.precio_venta * obj.cantidad_entregada)
 
     subTotal.short_description = "Sub-Total"
-
-    def precioVenta(self, obj):
-        return "%.2f Bs" % obj.producto.precio_venta
-
-    precioVenta.short_description = "Precio Venta"
 
     def fechaPedido(self, obj):
         return obj.pedido.getFechaPedido()
@@ -123,7 +123,7 @@ class DetalleDevolucionPedidoClienteInline(admin.TabularInline):
 class DevolucionPedidoClienteCreationForm(forms.ModelForm):
     class Meta:
         model = DevolucionPedidoCliente
-        fields = ['cliente', 'fecha_devolucion', 'detalle']
+        fields = ['cliente', 'detalle']
 
     def clean_fecha_devolucion(self):
         fecha_devolucion = self.cleaned_data.get("fecha_devolucion")
@@ -139,9 +139,9 @@ class DevolucionPedidoClienteCreationForm(forms.ModelForm):
 
 
 class DevolucionPedidoClienteAdmin(admin.ModelAdmin):
-    #form = DevolucionPedidoClienteCreationForm
+    # form = DevolucionPedidoClienteCreationForm
 
-    fields = ['cliente', 'fecha_devolucion', 'detalle']
+    fields = ['cliente', 'detalle']
     list_filter = ['fecha_devolucion']
     search_fields = ['cliente__nombre']
     list_display = ['cliente', 'fecha_devolucion', 'detalle']
@@ -156,7 +156,7 @@ class DevolucionPedidoClienteAdmin(admin.ModelAdmin):
             obj.delete()
         for instance in instances:
             producto = instance.producto
-            producto.stock -= instance.cantidad_devuelta
+            producto.stock += instance.cantidad_devuelta
             producto.save()
             instance.save()
         formset.save_m2m()
