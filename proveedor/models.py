@@ -31,9 +31,38 @@ class PedidoProveedor(Pedido):
         verbose_name_plural = "Pedido"
 
     proveedor = models.ForeignKey(Proveedor)
+    total_pagado = models.DecimalField(blank=True, default=0, max_digits=6, decimal_places=2)
 
     def __str__(self):
         return self.fecha_pedido.strftime("Pedido hecho el %d de %m del %Y")
+
+    def _precio_total(self):
+        detalle_pedido = DetallePedidoProveedor.objects.filter(pedido=self)
+        precio_total = 0
+        for detalle in detalle_pedido:
+            precio_total += detalle.cantidad_entregada * detalle.precio_compra
+        return "%.2f" % (precio_total, )
+
+    precio_total = property(_precio_total)
+
+    def _saldo(self):
+        detalle_pedido = DetallePedidoProveedor.objects.filter(pedido=self)
+        precio_total = 0
+        for detalle in detalle_pedido:
+            precio_total += detalle.cantidad_entregada * detalle.precio_compra
+        saldo = precio_total - self.total_pagado
+        return "%.2f" % (saldo, )
+
+    saldo = property(_saldo)
+
+    def cancelado(self):
+        detalle_pedido = DetallePedidoProveedor.objects.filter(pedido=self)
+        precio_total = 0
+        for detalle in detalle_pedido:
+            precio_total += detalle.cantidad_entregada * detalle.precio_compra
+        return self.total_pagado == precio_total
+
+    cancelado.boolean = True
 
 
 class DetallePedidoProveedor(DetallePedido):

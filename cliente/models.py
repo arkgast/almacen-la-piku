@@ -47,7 +47,6 @@ class PedidoCliente(Pedido):
         for detalle in detalle_pedido:
             precio_total += detalle.cantidad_entregada * detalle.precio_venta
 
-        saldo = self.total_pagado - precio_total
         saldo = precio_total - self.total_pagado
         return "%.2f" % (saldo, )
 

@@ -25,22 +25,12 @@ class DetallePedidoProveedorInline(admin.TabularInline):
 
 
 class PedidoProveedorAdmin(admin.ModelAdmin):
-    fields = ['proveedor']
-
-    list_display = ('proveedor', 'fecha_pedido', 'precioTotal', 'estado', )
+    fields = ['proveedor', 'total_pagado']
+    list_display = ('proveedor', 'fecha_pedido', 'precio_total', 'total_pagado', 'cancelado', )
     list_filter = ('fecha_pedido', 'estado')
     search_fields = ['fecha_pedido', 'proveedor__nombre']
 
     inlines = [DetallePedidoProveedorInline]
-
-    def precioTotal(self, obj):
-        dps = DetallePedidoProveedor.objects.filter(pedido=obj)
-        total = 0
-        for dp in dps:
-            total += dp.precio_compra * dp.cantidad_entregada
-        return "%.2f Bs" % total
-
-    precioTotal.short_description = "Precio Total"
 
     def save_formset(self, request, form, formset, change):
         instances = formset.save(commit=False)
