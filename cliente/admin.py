@@ -61,6 +61,7 @@ class PedidoClienteAdmin(admin.ModelAdmin):
     fields = ['cliente', 'total_pagado']
     inlines = [DetallePedidoClienteInline]
     list_display = ('cliente', 'fecha_pedido', 'precio_total', 'total_pagado', 'saldo', 'cancelado', )
+    list_editable = ('total_pagado', )
     list_filter = ('fecha_pedido', )
     search_fields = ['fecha_pedido', 'cliente__nombre']
     actions = ['generar_pdf']
