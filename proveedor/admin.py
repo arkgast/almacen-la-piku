@@ -27,7 +27,7 @@ class DetallePedidoProveedorInline(admin.TabularInline):
 class PedidoProveedorAdmin(admin.ModelAdmin):
     fields = ['proveedor', 'total_pagado']
     list_display = ('proveedor', 'fecha_pedido', 'precio_total', 'total_pagado', 'cancelado', )
-    list_filter = ('fecha_pedido', 'estado')
+    list_filter = ('fecha_pedido', )
     search_fields = ['fecha_pedido', 'proveedor__nombre']
 
     inlines = [DetallePedidoProveedorInline]

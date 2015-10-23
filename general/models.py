@@ -8,7 +8,6 @@ from producto.models import Producto
 
 class Pedido(models.Model):
     fecha_pedido = models.DateField(auto_now=True)
-    estado = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
