@@ -32,6 +32,7 @@ class Pedido(models.Model):
 class DetallePedido(models.Model):
     cantidad_solicitada = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     cantidad_entregada = models.DecimalField(blank=True, default=0, max_digits=6, decimal_places=2)
+    cantidad_entregada_anterior = models.DecimalField(blank=True, default=0, max_digits=6, decimal_places=2)
     producto = models.ForeignKey(Producto)
 
     class Meta:

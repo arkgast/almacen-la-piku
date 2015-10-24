@@ -1,7 +1,10 @@
 # coding=utf-8
+from functools import partial
 
+from django import forms
 from django.contrib import admin
 
+from general import app_messages
 from proveedor.models import (
     Proveedor, PedidoProveedor, DetallePedidoProveedor,
     DevolucionPedidoProveedor, DetalleDevolucionPedidoProveedor
@@ -24,14 +27,39 @@ class DetallePedidoProveedorInline(admin.TabularInline):
     min_num = 1
 
 
+class PedidoProveedorForm(forms.ModelForm):
+    class Meta:
+        model = PedidoProveedor
+        fields = ['proveedor', 'total_pagado']
+
+    def clean_total_pagado(self):
+        total_pagado = self.cleaned_data.get("total_pagado")
+        if total_pagado < 0:
+            raise forms.ValidationError(app_messages.TOTAL_PAGADO_MUST_BE_POSITIVE)
+        elif total_pagado > float(self.instance.precio_total):
+            raise forms.ValidationError(app_messages.TOTAL_PAGADO_MUST_BE_LESS)
+        return total_pagado
+
+
 class PedidoProveedorAdmin(admin.ModelAdmin):
-    fields = ['proveedor', 'total_pagado']
-    list_display = ('proveedor', 'fecha_pedido', 'precio_total', 'total_pagado', 'cancelado', )
+    form = PedidoProveedorForm
+    fields = ['proveedor']
+    list_display = ('proveedor', 'fecha_pedido', 'precio_total', 'total_pagado', 'saldo', 'cancelado', )
     list_editable = ('total_pagado', )
     list_filter = ('fecha_pedido', )
     search_fields = ['fecha_pedido', 'proveedor__nombre']
 
     inlines = [DetallePedidoProveedorInline]
+
+    def get_changelist_formset(self, request, **kwargs):
+        defaults = {
+            "formfield_callback": partial(super(PedidoProveedorAdmin, self).formfield_for_dbfield, request=request),
+            "form": PedidoProveedorForm,
+        }
+        defaults.update(kwargs)
+        return forms.models.modelformset_factory(PedidoProveedor,
+                                                 extra=0,
+                                                 fields=self.list_editable, **defaults)
 
     def save_formset(self, request, form, formset, change):
         instances = formset.save(commit=False)
@@ -46,8 +74,16 @@ class PedidoProveedorAdmin(admin.ModelAdmin):
         for instance in instances:
             if instance.cantidad_entregada is None:
                 instance.cantidad_entregada = 0
+            if instance.cantidad_entregada_anterior is None:
+                instance.cantidad_entregada_anterior = 0
             producto = instance.producto
-            producto.stock += instance.cantidad_entregada
+
+            if instance.cantidad_entregada > instance.cantidad_entregada_anterior:
+                cantidad_entregada = instance.cantidad_entregada - instance.cantidad_entregada_anterior
+                producto.stock += instance.cantidad_entregada
+            else:
+                cantidad_entregada = instance.cantidad_entregada_anterior - instance.cantidad_entregada
+                producto.stock -= instance.cantidad_entregada
             producto.save()
             instance.save()
         formset.save_m2m()

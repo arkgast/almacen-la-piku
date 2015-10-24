@@ -13,6 +13,7 @@ from cliente.models import (
     Cliente, PedidoCliente, DetallePedidoCliente,
     DevolucionPedidoCliente, DetalleDevolucionPedidoCliente,
 )
+from producto.models import Producto
 from general import app_messages
 
 
@@ -49,8 +50,29 @@ class ClienteAdmin(admin.ModelAdmin):
 
 
 # Pedido Cliente
+class DetallePedidoClienteFormset(forms.BaseInlineFormSet):
+    def clean(self):
+        # self.instance makes referense to PedidoCliente
+
+        for form in self.forms:
+            try:
+                producto = form.instance.producto
+                cantidad_solicitada = form.instance.cantidad_solicitada
+                cantidad_entregada = form.instance.cantidad_entregada
+                if cantidad_solicitada > producto.stock:
+                    raise forms.ValidationError(app_messages.CANTIDAD_SOLICITADA_DOES_NOT_EXISTS)
+                elif cantidad_solicitada < 0:
+                    raise forms.ValidationError(app_messages.CANTIDAD_SOLICITADA_MUST_BE_POSITIVE)
+                elif cantidad_entregada > cantidad_solicitada:
+                    raise forms.ValidationError(app_messages.CANTIDAD_ENTREGADA_MUST_BE_LESS)
+                elif cantidad_entregada < 0:
+                    raise forms.ValidationError(app_messages.CANTIDAD_ENTREGADA_MUST_BE_POSITIVE)
+            except Producto.DoesNotExist:
+                pass
+
 
 class DetallePedidoClienteInline(admin.TabularInline):
+    formset = DetallePedidoClienteFormset
     extra = 1
     fields = ['producto', 'cantidad_solicitada', 'cantidad_entregada', 'precio_venta']
     min_num = 1
@@ -104,8 +126,6 @@ class PedidoClienteAdmin(admin.ModelAdmin):
     def save_formset(self, request, form, formset, change):
         instances = formset.save(commit=False)
 
-        print '<=-======'
-        print 'hello world'
         for obj in formset.deleted_objects:
             if obj.cantidad_entregada is None:
                 obj.cantidad_entregada = 0
@@ -114,10 +134,22 @@ class PedidoClienteAdmin(admin.ModelAdmin):
             producto.save()
             obj.delete()
         for instance in instances:
+
             if instance.cantidad_entregada is None:
                 instance.cantidad_entregada = 0
+            if instance.cantidad_entregada_anterior is None:
+                instance.cantidad_entregada_anterior = 0
             producto = instance.producto
-            producto.stock -= instance.cantidad_entregada
+
+            if instance.cantidad_entregada > instance.cantidad_entregada_anterior:
+                cantidad_entregada = instance.cantidad_entregada - instance.cantidad_entregada_anterior
+                producto.stock -= cantidad_entregada
+            else:
+                cantidad_entregada = instance.cantidad_entregada_anterior - instance.cantidad_entregada
+                producto.stock += cantidad_entregada
+
+            instance.cantidad_entregada_anterior = instance.cantidad_entregada
+
             producto.save()
             instance.save()
             formset.save_m2m()
