@@ -19,7 +19,21 @@ class ProveedorAdmin(admin.ModelAdmin):
 
 
 # Pedido Proveedor
+class DetallePedidoProveedorFormSet(forms.BaseInlineFormSet):
+    def clean(self):
+        for form in self.forms:
+            cantidad_solicitada = form.instance.cantidad_solicitada
+            cantidad_entregada = form.instance.cantidad_entregada
+            if cantidad_solicitada < 0:
+                raise forms.ValidationError(app_messages.CANTIDAD_SOLICITADA_MUST_BE_POSITIVE)
+            elif cantidad_entregada > cantidad_solicitada:
+                raise forms.ValidationError(app_messages.CANTIDAD_ENTREGADA_MUST_BE_LESS)
+            elif cantidad_entregada < 0:
+                raise forms.ValidationError(app_messages.CANTIDAD_ENTREGADA_MUST_BE_POSITIVE)
+
+
 class DetallePedidoProveedorInline(admin.TabularInline):
+    formset = DetallePedidoProveedorFormSet
     model = DetallePedidoProveedor
     fields = ['producto', 'cantidad_solicitada', 'cantidad_entregada', 'precio_compra']
 
@@ -80,10 +94,12 @@ class PedidoProveedorAdmin(admin.ModelAdmin):
 
             if instance.cantidad_entregada > instance.cantidad_entregada_anterior:
                 cantidad_entregada = instance.cantidad_entregada - instance.cantidad_entregada_anterior
-                producto.stock += instance.cantidad_entregada
+                producto.stock += cantidad_entregada
             else:
                 cantidad_entregada = instance.cantidad_entregada_anterior - instance.cantidad_entregada
-                producto.stock -= instance.cantidad_entregada
+                producto.stock -= cantidad_entregada
+
+            instance.cantidad_entregada_anterior = instance.cantidad_entregada
             producto.save()
             instance.save()
         formset.save_m2m()

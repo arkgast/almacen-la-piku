@@ -68,7 +68,7 @@ class DetallePedidoCliente(DetallePedido):
         verbose_name = "Detalle pedido"
         verbose_name_plural = "Detalle pedido"
 
-    precio_venta = models.DecimalField(max_digits=6, decimal_places=2)
+    precio_venta = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     pedido = models.ForeignKey(PedidoCliente)
 
     def __str__(self):
