@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
-import dj_database_url
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -45,6 +44,7 @@ INSTALLED_APPS = (
     'producto',
     'proveedor',
     'usuario',
+    'easy_pdf',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -92,13 +92,19 @@ DATABASES = {
     }
 }
 
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
 LANGUAGE_CODE = 'es-bo'
 
-TIME_ZONE = 'America/La_Paz'
+TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
@@ -111,6 +117,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'cliente/static/')
 
 # Bootstrap
 DAB_FIELD_RENDERER = 'django_admin_bootstrapped.renderers.BootstrapFieldRenderer'
@@ -123,8 +130,7 @@ MESSAGE_TAGS = {
     messages.ERROR: 'alert-danger error'
 }
 
-DATABASES['default'] = dj_database_url.config()
-DATABASES['default']['ENGINE'] = 'django_postgrespool'
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-ALLOWED_HOSTS = ['*']
-STATIC_ROOT = 'staticfiles'
+# messages.success(request, "My success message")
+# messages.warning(request, "My warning message")
+# messages.error(request, "My error message")
+TEMPLATES_DIRS = [os.path.join(BASE_DIR, 'templates')]
