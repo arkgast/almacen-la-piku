@@ -2,6 +2,7 @@
 
 import re
 import datetime
+from functools import partial
 
 from django import forms
 from django.contrib import admin
@@ -57,14 +58,40 @@ class DetallePedidoClienteInline(admin.TabularInline):
     show_change_link = False
 
 
+class PedidoClienteForm(forms.ModelForm):
+    class Meta:
+        model = PedidoCliente
+        fields = ['cliente', 'total_pagado']
+
+    def clean_total_pagado(self):
+        total_pagado = self.cleaned_data.get("total_pagado")
+        if total_pagado < 0:
+            raise forms.ValidationError(app_messages.TOTAL_PAGADO_MUST_BE_POSITIVE)
+        elif total_pagado > float(self.instance.precio_total):
+            raise forms.ValidationError(app_messages.TOTAL_PAGADO_MUST_BE_LESS)
+        return total_pagado
+
+
 class PedidoClienteAdmin(admin.ModelAdmin):
-    fields = ['cliente', 'total_pagado']
+    form = PedidoClienteForm
+
+    fields = ['cliente']
     inlines = [DetallePedidoClienteInline]
     list_display = ('cliente', 'fecha_pedido', 'precio_total', 'total_pagado', 'saldo', 'cancelado', )
     list_editable = ('total_pagado', )
     list_filter = ('fecha_pedido', )
     search_fields = ['fecha_pedido', 'cliente__nombre']
     actions = ['generar_pdf']
+
+    def get_changelist_formset(self, request, **kwargs):
+        defaults = {
+            "formfield_callback": partial(super(PedidoClienteAdmin, self).formfield_for_dbfield, request=request),
+            "form": PedidoClienteForm,
+        }
+        defaults.update(kwargs)
+        return forms.models.modelformset_factory(PedidoCliente,
+                                                 extra=0,
+                                                 fields=self.list_editable, **defaults)
 
     def generar_pdf(self, request, queryset):
         id = queryset[0].id
@@ -77,6 +104,8 @@ class PedidoClienteAdmin(admin.ModelAdmin):
     def save_formset(self, request, form, formset, change):
         instances = formset.save(commit=False)
 
+        print '<=-======'
+        print 'hello world'
         for obj in formset.deleted_objects:
             if obj.cantidad_entregada is None:
                 obj.cantidad_entregada = 0
@@ -91,26 +120,7 @@ class PedidoClienteAdmin(admin.ModelAdmin):
             producto.stock -= instance.cantidad_entregada
             producto.save()
             instance.save()
-        formset.save_m2m()
-
-
-# Detalle Pedido Cliente - Is not in use
-class DetallePedidoClienteAdmin(admin.ModelAdmin):
-    fields = ['producto', 'cantidad_solicitada', 'cantidad_entregada', 'pedido']
-    list_display = ['pedido', 'fechaPedido', 'producto', 'precio_venta', 'cantidad_solicitada', 'cantidad_entregada', 'subTotal']
-    list_display_links = None
-    list_filter = ['pedido__cliente__nombre']
-    search_fields = ['pedido__cliente__nombre', 'producto__nombre']
-
-    def subTotal(self, obj):
-        return "%.2f Bs" % (obj.producto.precio_venta * obj.cantidad_entregada)
-
-    subTotal.short_description = "Sub-Total"
-
-    def fechaPedido(self, obj):
-        return obj.pedido.getFechaPedido()
-
-    fechaPedido.short_description = "Fecha Pedido"
+            formset.save_m2m()
 
 
 # Devolucion Pedido Cliente
@@ -166,4 +176,3 @@ class DevolucionPedidoClienteAdmin(admin.ModelAdmin):
 admin.site.register(Cliente, ClienteAdmin)
 admin.site.register(PedidoCliente, PedidoClienteAdmin)
 admin.site.register(DevolucionPedidoCliente, DevolucionPedidoClienteAdmin)
-# admin.site.register(DetallePedidoCliente, DetallePedidoClienteAdmin)

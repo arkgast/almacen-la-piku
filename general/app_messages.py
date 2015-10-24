@@ -12,3 +12,7 @@ STOCK_MUST_BE_POSITIVE = "El stock debe ser mayor a 0"
 NAME_MUST_BE_VALID = "Ingrese un nombre válido"
 PHONE_NUMBER_MUST_BE_VALID = "Ingrese un número de teléfono válido"
 NIT_MUST_BE_VALID = "Ingrese un número de nit válido"
+
+# Total Pagado
+TOTAL_PAGADO_MUST_BE_POSITIVE = "El total pagado debe ser mayor a 0"
+TOTAL_PAGADO_MUST_BE_LESS = "El total pagado debe ser menor o igual al precio total"
