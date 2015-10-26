@@ -1,4 +1,5 @@
 from easy_pdf.views import PDFTemplateView
+from django.shortcuts import render_to_response
 
 from cliente.models import PedidoCliente, DetallePedidoCliente
 
@@ -18,3 +19,7 @@ class FacturaPDF(PDFTemplateView):
             title="Factura",
             **kwargs
         )
+
+
+def test_view(request):
+    return render_to_response('test.html', {})
