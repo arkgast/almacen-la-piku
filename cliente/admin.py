@@ -174,15 +174,9 @@ class DevolucionPedidoClienteCreationForm(forms.ModelForm):
             raise forms.ValidationError(app_messages.DATE_MUST_BE_GREATER)
         return fecha_devolucion
 
-    def save(self, commit=True):
-        devolucion_pedido_cliente = super(DevolucionPedidoClienteCreationForm, self).save(commit=False)
-        if commit:
-            devolucion_pedido_cliente.save()
-        return devolucion_pedido_cliente
-
 
 class DevolucionPedidoClienteAdmin(admin.ModelAdmin):
-    # form = DevolucionPedidoClienteCreationForm
+    form = DevolucionPedidoClienteCreationForm
 
     fields = ['cliente', 'detalle']
     list_filter = ['fecha_devolucion']
