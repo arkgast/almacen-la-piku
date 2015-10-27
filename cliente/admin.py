@@ -9,6 +9,8 @@ from django.contrib import admin
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 
+from simple_history.admin import SimpleHistoryAdmin
+
 from cliente.models import (
     Cliente, PedidoCliente, DetallePedidoCliente,
     DevolucionPedidoCliente, DetalleDevolucionPedidoCliente,
@@ -42,7 +44,8 @@ class ClienteCreationForm(forms.ModelForm):
         return cliente
 
 
-class ClienteAdmin(admin.ModelAdmin):
+# class ClienteAdmin(admin.ModelAdmin, SimpleHistoryAdmin):
+class ClienteAdmin(SimpleHistoryAdmin):
     form = ClienteCreationForm
 
     list_display = ['nombre', 'nit', 'telefono']
@@ -94,7 +97,8 @@ class PedidoClienteForm(forms.ModelForm):
         return total_pagado
 
 
-class PedidoClienteAdmin(admin.ModelAdmin):
+# class PedidoClienteAdmin(admin.ModelAdmin):
+class PedidoClienteAdmin(SimpleHistoryAdmin):
     form = PedidoClienteForm
 
     fields = ['cliente']
@@ -153,6 +157,11 @@ class PedidoClienteAdmin(admin.ModelAdmin):
             producto.save()
             instance.save()
             formset.save_m2m()
+
+    def changelist_view(self, request, extra_content=None):
+        extra_content = extra_content or {}
+        extra_content['hello'] = 'Hello world'
+        return super(PedidoClienteAdmin, self).changelist_view(request, extra_content)
 
 
 # Devolucion Pedido Cliente

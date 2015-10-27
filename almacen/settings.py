@@ -45,6 +45,7 @@ INSTALLED_APPS = (
     'proveedor',
     'usuario',
     'easy_pdf',
+    'simple_history',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -56,6 +57,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'simple_history.middleware.HistoryRequestMiddleware',
 )
 
 ROOT_URLCONF = 'almacen.urls'
@@ -63,7 +65,9 @@ ROOT_URLCONF = 'almacen.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            'almacen/templates',
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -133,4 +137,6 @@ MESSAGE_TAGS = {
 # messages.success(request, "My success message")
 # messages.warning(request, "My warning message")
 # messages.error(request, "My error message")
-TEMPLATES_DIRS = [os.path.join(BASE_DIR, 'templates')]
+TEMPLATES_DIRS = (
+    os.path.join(BASE_DIR, 'templates'),
+)
