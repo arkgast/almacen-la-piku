@@ -1,3 +1,0 @@
-{% block branding %}
-	<h1 id="site-name">Hello world</h1>
-{% endblock %}
