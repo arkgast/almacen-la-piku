@@ -6,7 +6,6 @@
 
 {% block content %}
   <div id="content-main">
-
     {#<p>{% blocktrans %}Choose a date from the list below to revert to a previous version of this object.{% endblocktrans %}</p>#}
 
     <div class="module">
@@ -14,18 +13,26 @@
         <table id="change-history" class="table table-bordered table-striped">
           <thead>
             <tr>
-              <th scope="col">{% trans 'Object' %}</th>
+              <th scope="col">{% trans 'App' %}</th>
               <th scope="col">{% trans 'Date/time' %}</th>
-              <th scope="col">{% trans 'Comment' %}</th>
-              <th scope="col">{% trans 'Changed by' %}</th>
+              <th scope="col">{% trans 'Comentario' %}</th>
+              <th scope="col">{% trans 'Cambiado por' %}</th>
             </tr>
           </thead>
           <tbody>
             {% for action in action_list %}
               <tr>
-                <td><a href="{% url opts|admin_urlname:'simple_history' object.pk action.pk %}">{{ action.history_object }}</a></td>
+                <!--<td><a href="{% url opts|admin_urlname:'simple_history' object.pk action.pk %}">{{ action.history_object }}</a></td>-->
+                <td>{{ action.history_object }}</td>
                 <td>{{ action.history_date }}</td>
-                <td>{{ action.get_history_type_display }}</td>
+                <!--<td>{{ action.get_history_type_display }}</td>-->
+                <td>
+                  {% if action.get_history_type_display == "Created" %}
+                    Creado 
+                  {% elif action.get_history_type_display == "Changed" %}
+                    Modificado
+                  {% endif %}
+                </td>
                 <td>
                   {% if action.history_user %}
                     {% url admin_user_view action.history_user_id as admin_user_url %}
@@ -43,7 +50,8 @@
           </tbody>
         </table>
       {% else %}
-        <p>{% trans "This object doesn't have a change history." %}</p>
+        <!--<p>{% trans "This object doesn't have a change history." %}</p>-->
+        Aún no se han registrado cambios
       {% endif %}
     </div>
   </div>

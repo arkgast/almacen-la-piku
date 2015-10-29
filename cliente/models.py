@@ -1,6 +1,7 @@
 # coding=utf-8
 
 from django.db import models
+
 from simple_history.models import HistoricalRecords
 
 from general.models import (
@@ -17,7 +18,6 @@ class Cliente(models.Model):
     nit = models.CharField(max_length=10)
     nombre = models.CharField(max_length=120)
     telefono = models.PositiveIntegerField(verbose_name="Telefóno")
-    history = HistoricalRecords()
 
     def __str__(self):
         return self.nombre
@@ -30,7 +30,6 @@ class PedidoCliente(Pedido):
 
     cliente = models.ForeignKey(Cliente)
     total_pagado = models.DecimalField(blank=True, default=0, max_digits=6, decimal_places=2)
-    history = HistoricalRecords()
 
     def __str__(self):
         return str(self.cliente)
@@ -76,7 +75,7 @@ class DetallePedidoCliente(DetallePedido):
     history = HistoricalRecords()
 
     def __str__(self):
-        return str(self.pedido)
+        return "%s - %s" % (self.producto, self.precio_venta)
 
     def _sub_total(self):
         return '%.2f Bs' % (self.cantidad_entregada * self.precio_venta, )

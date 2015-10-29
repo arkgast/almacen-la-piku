@@ -2,6 +2,8 @@
 
 from django.db import models
 
+from simple_history.models import HistoricalRecords
+
 # from producto.models import Producto
 from general.models import (
     Pedido, DetallePedido,
@@ -72,9 +74,10 @@ class DetallePedidoProveedor(DetallePedido):
 
     precio_compra = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     pedido = models.ForeignKey(PedidoProveedor)
+    history = HistoricalRecords()
 
     def __str__(self):
-        return str(self.pedido)
+        return "%s - %s" % (self.producto, self.precio_compra)
 
 
 # Devolución

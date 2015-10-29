@@ -97,7 +97,6 @@ class PedidoClienteForm(forms.ModelForm):
         return total_pagado
 
 
-# class PedidoClienteAdmin(admin.ModelAdmin):
 class PedidoClienteAdmin(SimpleHistoryAdmin):
     form = PedidoClienteForm
 
@@ -163,6 +162,46 @@ class PedidoClienteAdmin(SimpleHistoryAdmin):
         extra_content['hello'] = 'Hello world'
         return super(PedidoClienteAdmin, self).changelist_view(request, extra_content)
 
+    def history_view(self, request, object_id, extra_context=None):
+        from cliente.models import HistoricalDetallePedidoCliente
+
+        from django.conf import settings
+        from django.contrib.contenttypes.models import ContentType
+        from django.contrib.admin.utils import unquote
+        from django.shortcuts import get_object_or_404, render
+        from django.utils.encoding import force_text
+        from django.utils.text import capfirst
+        from django.utils.translation import ugettext as _
+
+        USER_NATURAL_KEY = settings.AUTH_USER_MODEL
+        USER_NATURAL_KEY = tuple(key.lower() for key in USER_NATURAL_KEY.split('.', 1))
+
+        model = self.model
+        opts = model._meta
+        app_label = opts.app_label
+        object_id = unquote(object_id)
+        # If no history was found, see whether this object even exists.
+        obj = get_object_or_404(model, pk=object_id)
+        action_list = HistoricalDetallePedidoCliente.objects.filter(pedido=obj)
+        content_type = ContentType.objects.get_by_natural_key(
+            *USER_NATURAL_KEY)
+        admin_user_view = 'admin:%s_%s_change' % (content_type.app_label,
+                                                  content_type.model)
+        context = {
+            'title': _('Change history: %s') % force_text(obj),
+            'action_list': action_list,
+            'module_name': capfirst(force_text(opts.verbose_name_plural)),
+            'object': obj,
+            'root_path': getattr(self.admin_site, 'root_path', None),
+            'app_label': app_label,
+            'opts': opts,
+            'admin_user_view': admin_user_view
+        }
+        context.update(extra_context or {})
+        return render(request,
+                      template_name=self.object_history_template,
+                      dictionary=context, current_app=self.admin_site.name)
+
 
 # Devolucion Pedido Cliente
 class DetalleDevolucionPedidoClienteInline(admin.TabularInline):
@@ -211,3 +250,4 @@ class DevolucionPedidoClienteAdmin(admin.ModelAdmin):
 admin.site.register(Cliente, ClienteAdmin)
 admin.site.register(PedidoCliente, PedidoClienteAdmin)
 admin.site.register(DevolucionPedidoCliente, DevolucionPedidoClienteAdmin)
+# admin.site.register(DetallePedidoCliente, DetallePedidoClienteAdmin)
