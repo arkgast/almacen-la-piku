@@ -250,4 +250,3 @@ class DevolucionPedidoClienteAdmin(admin.ModelAdmin):
 admin.site.register(Cliente, ClienteAdmin)
 admin.site.register(PedidoCliente, PedidoClienteAdmin)
 admin.site.register(DevolucionPedidoCliente, DevolucionPedidoClienteAdmin)
-# admin.site.register(DetallePedidoCliente, DetallePedidoClienteAdmin)

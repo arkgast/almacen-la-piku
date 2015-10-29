@@ -77,7 +77,7 @@ class DetallePedidoProveedor(DetallePedido):
     history = HistoricalRecords()
 
     def __str__(self):
-        return "%s - %s" % (self.producto, self.precio_compra)
+        return str(self.producto)
 
 
 # Devolución

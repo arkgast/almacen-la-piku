@@ -75,7 +75,7 @@ class DetallePedidoCliente(DetallePedido):
     history = HistoricalRecords()
 
     def __str__(self):
-        return "%s - %s" % (self.producto, self.precio_venta)
+        return str(self.producto)
 
     def _sub_total(self):
         return '%.2f Bs' % (self.cantidad_entregada * self.precio_venta, )

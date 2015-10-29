@@ -4,6 +4,8 @@ from functools import partial
 from django import forms
 from django.contrib import admin
 
+from simple_history.admin import SimpleHistoryAdmin
+
 from general import app_messages
 from proveedor.models import (
     Proveedor, PedidoProveedor, DetallePedidoProveedor,
@@ -55,7 +57,7 @@ class PedidoProveedorForm(forms.ModelForm):
         return total_pagado
 
 
-class PedidoProveedorAdmin(admin.ModelAdmin):
+class PedidoProveedorAdmin(SimpleHistoryAdmin):
     form = PedidoProveedorForm
     fields = ['proveedor']
     list_display = ('proveedor', 'fecha_pedido', 'precio_total', 'total_pagado', 'saldo', 'cancelado', )
@@ -105,7 +107,7 @@ class PedidoProveedorAdmin(admin.ModelAdmin):
         formset.save_m2m()
 
     def history_view(self, request, object_id, extra_context=None):
-        from cliente.models import HistoricalDetallePedidoProveedor
+        from proveedor.models import HistoricalDetallePedidoProveedor
 
         from django.conf import settings
         from django.contrib.contenttypes.models import ContentType

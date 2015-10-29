@@ -45,6 +45,8 @@ INSTALLED_APPS = (
     'producto',
     'proveedor',
     'usuario',
+    'easy_pdf',
+    'simple_history',
 )
 
 MIDDLEWARE_CLASSES = (

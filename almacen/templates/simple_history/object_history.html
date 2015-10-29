@@ -13,7 +13,7 @@
         <table id="change-history" class="table table-bordered table-striped">
           <thead>
             <tr>
-              <th scope="col">{% trans 'App' %}</th>
+              <th scope="col">{% trans 'Productos' %}</th>
               <th scope="col">{% trans 'Date/time' %}</th>
               <th scope="col">{% trans 'Comentario' %}</th>
               <th scope="col">{% trans 'Cambiado por' %}</th>
@@ -22,8 +22,7 @@
           <tbody>
             {% for action in action_list %}
               <tr>
-                <!--<td><a href="{% url opts|admin_urlname:'simple_history' object.pk action.pk %}">{{ action.history_object }}</a></td>-->
-                <td>{{ action.history_object }}</td>
+                <td>{{ action.producto }} - {{ action.precio_compra }} {{ action.precio_venta }}</td>
                 <td>{{ action.history_date }}</td>
                 <!--<td>{{ action.get_history_type_display }}</td>-->
                 <td>
@@ -50,7 +49,6 @@
           </tbody>
         </table>
       {% else %}
-        <!--<p>{% trans "This object doesn't have a change history." %}</p>-->
         Aún no se han registrado cambios
       {% endif %}
     </div>
