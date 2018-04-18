@@ -47,3 +47,7 @@ Ahora ir a http://localhost:9000
 * Manejo de clientes
 * Manejo de pedidos
 * Manejo de devoluciones
+
+## Licencia
+
+MIT
